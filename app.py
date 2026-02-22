@@ -1,19 +1,31 @@
-# Import Flask class from flask package
 from flask import Flask, render_template
+from extensions import db
 
-# Create Flask application instance
-app = Flask(__name__)
-
-# Route for home page
-@app.route('/')
-def home():
+def create_app():
     """
-    This function handles the home page request.
-    It returns the index.html page from templates folder.
+    Application factory function
     """
-    return render_template('index.html')
+    app = Flask(__name__)
 
-# Main driver function
+    # Database configuration
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    # Initialize database with app
+    db.init_app(app)
+
+    # Import models AFTER db initialization
+    import models
+
+    @app.route('/')
+    def home():
+        return render_template('index.html')
+
+    return app
+
+
+# Create app instance
+app = create_app()
+
 if __name__ == '__main__':
-    # Run the Flask application in debug mode
     app.run(debug=True)
