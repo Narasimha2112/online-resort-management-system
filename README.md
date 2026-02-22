@@ -12,3 +12,6 @@ resort bookings, rooms, and administrative operations.
 
 ## Project Status
 Day 1: Project setup and Flask initialization completed.
+Day 2: SQLite and Datebase completed.
+
+
