@@ -35,3 +35,14 @@ class Booking(db.Model):
     check_in = db.Column(db.Date)
     check_out = db.Column(db.Date)
     booking_date = db.Column(db.DateTime, default=datetime.utcnow)
+
+# ---------------- PAYMENT TABLE ----------------
+class Payment(db.Model):
+    """
+    This table stores payment information
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    booking_id = db.Column(db.Integer)
+    amount = db.Column(db.Integer)
+    status = db.Column(db.String(20))   # Success / Failed
+    payment_date = db.Column(db.DateTime, default=datetime.utcnow)

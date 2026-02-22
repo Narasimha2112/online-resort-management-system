@@ -4,7 +4,7 @@ from datetime import datetime
 
 # Import db and models
 from models import db, User
-from models import Admin, Room, Booking, User
+from models import Admin, Room, Booking, User, Payment
 
 # Create Flask app
 app = Flask(__name__)
@@ -208,9 +208,50 @@ def book_room(room_id):
         db.session.add(new_booking)
         db.session.commit()
 
-        return redirect('/my-bookings')
+        # Redirect to payment page after booking
+        return redirect(f"/payment/{new_booking.id}")
 
     return render_template('book_room.html', room=room)
+
+# ---------------- PAYMENT ----------------
+@app.route('/payment/<int:booking_id>', methods=['GET', 'POST'])
+def payment(booking_id):
+    """
+    Simulated payment page
+    """
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    booking = Booking.query.get(booking_id)
+    room = Room.query.get(booking.room_id)
+
+    if request.method == 'POST':
+        # Simulate payment success
+        payment = Payment(
+            booking_id=booking_id,
+            amount=room.price,
+            status="Success"
+        )
+
+        db.session.add(payment)
+        db.session.commit()
+
+        return redirect('/payment-success')
+
+    return render_template(
+        'payment.html',
+        amount=room.price
+    )
+
+@app.route('/payment-success')
+def payment_success():
+    """
+    Payment success confirmation page
+    """
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    return render_template('payment_success.html')
 
 # ---------------- VIEW MY BOOKINGS(USER) ----------------
 @app.route('/my-bookings')
