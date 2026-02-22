@@ -22,7 +22,10 @@ db.init_app(app)
 # ---------------- HOME ----------------
 @app.route('/')
 def home():
-    return render_template('index.html')
+    """
+    Landing page – role selection
+    """
+    return render_template('home.html')
 
 # ---------------- REGISTER ----------------
 @app.route('/register', methods=['GET', 'POST'])
@@ -159,8 +162,14 @@ def update_room_status(room_id):
 # ---------------- LOGOUT ----------------
 @app.route('/logout')
 def logout():
-    session.clear()
-    return redirect('/login')
+    """
+    Logout for both admin and user
+    """
+    session.pop('user_id', None)
+    session.pop('user_name', None)
+    session.pop('admin_id', None)
+    session.pop('admin_username', None)
+    return redirect('/')
 
 # ---------------- USER VIEW ROOMS ----------------
 @app.route('/rooms')
@@ -264,6 +273,18 @@ def my_bookings():
 
     bookings = Booking.query.filter_by(user_id=session['user_id']).all()
     return render_template('my_bookings.html', bookings=bookings)
+
+# ---------------- VIEW MY BOOKINGS(ADMIN) ----------------
+@app.route('/admin/bookings')
+def admin_bookings():
+    """
+    Admin can view all bookings
+    """
+    if 'admin_id' not in session:
+        return redirect('/admin/login')
+
+    bookings = Booking.query.all()
+    return render_template('admin_bookings.html', bookings=bookings)
 
 # ---------------- CREATE TABLES ----------------
 if __name__ == '__main__':
