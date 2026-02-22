@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Room</title>
+    <link href="https://cdn.jsdelivr.net/npmbootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h2>Book {{ room.room_type }}</h2>
+
+    <form method="POST">
+        <label>Check-in Date</label>
+        <input class="form-control mb-3" type="date" name="check_in" required>
+
+        <label>Check-out Date</label>
+        <input class="form-control mb-3" type="date" name="check_out" required>
+
+        <button class="btn btn-success">Confirm Booking</button>
+    </form>
+</div>
+
+</body>
+</html>

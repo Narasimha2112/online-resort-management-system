@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, redirect, session
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 # Import db and models
 from models import db, User
-from models import Admin, Room
+from models import Admin, Room, Booking, User
 
 # Create Flask app
 app = Flask(__name__)
@@ -160,6 +161,68 @@ def update_room_status(room_id):
 def logout():
     session.clear()
     return redirect('/login')
+
+# ---------------- USER VIEW ROOMS ----------------
+@app.route('/rooms')
+def user_rooms():
+    """
+    Displays available rooms to users
+    """
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    rooms = Room.query.filter_by(status="Available").all()
+    return render_template('user_rooms.html', rooms=rooms)
+
+# ---------------- BOOKING (USER) ----------------
+@app.route('/book/<int:room_id>', methods=['GET', 'POST'])
+def book_room(room_id):
+    """
+    Handles room booking with date validation
+    """
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    room = Room.query.get(room_id)
+
+    if request.method == 'POST':
+        check_in = datetime.strptime(request.form['check_in'], '%Y-%m-%d').date()
+        check_out = datetime.strptime(request.form['check_out'], '%Y-%m-%d').date()
+
+        # Fetch existing bookings for this room
+        existing_bookings = Booking.query.filter_by(room_id=room_id).all()
+
+        # -------- DOUBLE BOOKING PREVENTION --------
+        for booking in existing_bookings:
+            if check_in < booking.check_out and check_out > booking.check_in:
+                return "Room already booked for selected dates"
+
+        # Save booking if no conflict
+        new_booking = Booking(
+            user_id=session['user_id'],
+            room_id=room_id,
+            check_in=check_in,
+            check_out=check_out
+        )
+
+        db.session.add(new_booking)
+        db.session.commit()
+
+        return redirect('/my-bookings')
+
+    return render_template('book_room.html', room=room)
+
+# ---------------- VIEW MY BOOKINGS(USER) ----------------
+@app.route('/my-bookings')
+def my_bookings():
+    """
+    Displays logged-in user's bookings
+    """
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    bookings = Booking.query.filter_by(user_id=session['user_id']).all()
+    return render_template('my_bookings.html', bookings=bookings)
 
 # ---------------- CREATE TABLES ----------------
 if __name__ == '__main__':
